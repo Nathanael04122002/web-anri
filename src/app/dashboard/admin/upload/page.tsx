@@ -1,4 +1,3 @@
-// File: src/app/dashboard/admin/upload/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -7,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const schema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
+  title: z.string().min(3, "Judul minimal 3 karakter"),
+  description: z.string().min(10, "Deskripsi minimal 10 karakter"),
   date: z.string(),
   category: z.string(),
-  image: z.any()
+  file: z.any(),
 });
 
 export default function UploadPage() {
@@ -26,9 +25,15 @@ export default function UploadPage() {
   const onSubmit = (data: any) => {
     const stored = JSON.parse(localStorage.getItem("articles") || "[]");
 
-    let imageUrl = "";
-    if (data.image && data.image[0]) {
-      imageUrl = URL.createObjectURL(data.image[0]);
+    let fileUrl = "";
+    let fileName = "";
+    let fileType = "";
+
+    if (data.file && data.file[0]) {
+      const file = data.file[0];
+      fileUrl = URL.createObjectURL(file); // untuk preview lokal
+      fileName = file.name;
+      fileType = file.type;
     }
 
     const updated = [
@@ -38,7 +43,9 @@ export default function UploadPage() {
         description: data.description,
         date: data.date,
         category: data.category.split(",").map((c: string) => c.trim()),
-        image: imageUrl,
+        fileUrl,
+        fileName,
+        fileType,
       },
     ];
 
@@ -52,25 +59,48 @@ export default function UploadPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block font-medium">Judul</label>
-          <input {...register("title")} className="w-full border p-2 rounded" />
+          <input
+            {...register("title")}
+            className="w-full border p-2 rounded"
+          />
+          {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
         </div>
         <div>
           <label className="block font-medium">Deskripsi</label>
-          <textarea {...register("description")} className="w-full border p-2 rounded" />
+          <textarea
+            {...register("description")}
+            className="w-full border p-2 rounded"
+          />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
         </div>
         <div>
           <label className="block font-medium">Tanggal</label>
-          <input type="date" {...register("date")} className="w-full border p-2 rounded" />
+          <input
+            type="date"
+            {...register("date")}
+            className="w-full border p-2 rounded"
+          />
         </div>
         <div>
           <label className="block font-medium">Kategori (pisahkan dengan koma)</label>
-          <input {...register("category")} className="w-full border p-2 rounded" />
+          <input
+            {...register("category")}
+            className="w-full border p-2 rounded"
+          />
         </div>
         <div>
-          <label className="block font-medium">Gambar (opsional)</label>
-          <input type="file" accept="image/*" {...register("image")} className="w-full border p-2 rounded bg-white" />
+          <label className="block font-medium">File (Gambar atau PDF)</label>
+          <input
+            type="file"
+            accept="image/*,.pdf"
+            {...register("file")}
+            className="w-full border p-2 rounded bg-white"
+          />
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
           Simpan
         </button>
       </form>

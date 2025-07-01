@@ -1,15 +1,33 @@
-// src/components/Sidebar.tsx
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
   return (
-    <div className="w-64 bg-blue-600 text-white p-6 flex flex-col gap-4">
-      <h2 className="text-2xl font-bold mb-6">Logoipsum</h2>
-      <nav className="flex flex-col gap-4">
-        <Link href="/dashboard/admin" className="hover:underline">Articles</Link>
-        <Link href="/dashboard/category" className="hover:underline">Category</Link>
-        <Link href="/logout" className="hover:underline">Logout</Link>
+    <aside className="bg-blue-600 text-white w-64 min-h-screen p-6">
+      <h1 className="text-2xl font-bold mb-6">Logoipsum</h1>
+      <nav className="space-y-4">
+        <Link href="/dashboard/admin" className="block hover:underline">
+          Articles
+        </Link>
+        <Link href="/dashboard/admin/category" className="block hover:underline">
+          Category
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="block text-left hover:underline"
+        >
+          Logout
+        </button>
       </nav>
-    </div>
+    </aside>
   );
 }
