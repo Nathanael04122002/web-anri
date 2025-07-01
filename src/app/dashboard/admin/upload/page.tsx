@@ -10,8 +10,10 @@ const schema = z.object({
   description: z.string().min(10, "Deskripsi minimal 10 karakter"),
   date: z.string(),
   category: z.string(),
-  file: z.any(),
+  file: z.instanceof(FileList),
 });
+
+type FormData = z.infer<typeof schema>;
 
 export default function UploadPage() {
   const router = useRouter();
@@ -20,18 +22,18 @@ export default function UploadPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const stored = JSON.parse(localStorage.getItem("articles") || "[]");
 
     let fileUrl = "";
     let fileName = "";
     let fileType = "";
 
-    if (data.file && data.file[0]) {
-      const file = data.file[0];
-      fileUrl = URL.createObjectURL(file); // untuk preview lokal
+    const file = data.file?.[0];
+    if (file) {
+      fileUrl = URL.createObjectURL(file);
       fileName = file.name;
       fileType = file.type;
     }
@@ -42,7 +44,7 @@ export default function UploadPage() {
         title: data.title,
         description: data.description,
         date: data.date,
-        category: data.category.split(",").map((c: string) => c.trim()),
+        category: data.category.split(",").map((c) => c.trim()),
         fileUrl,
         fileName,
         fileType,
